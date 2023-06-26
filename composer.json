@@ -1,15 +1,15 @@
 {
-    "name": "joppuyo/vips-image-editor",
-    "description": "High performance WordPress image processing with VIPS",
+    "name": "notglossy/vips-image-editor-ffi",
+    "description": "High performance WordPress image processing with VIPS using PHP FFI",
     "type": "wordpress-plugin",
     "license": "GPL-2.0-or-later",
     "authors": [
         {
-            "name": "Johannes Siipola",
-            "email": "johannes@siipo.la"
+            "name": "Matthew Potter",
+            "email": "3867591+notglossy@users.noreply.github.com"
         }
     ],
     "require": {
-        "jcupitt/vips": "^1.0"
+        "jcupitt/vips": "2.1.0"
     }
 }
