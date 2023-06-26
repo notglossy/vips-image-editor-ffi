@@ -1,4 +1,4 @@
-# VIPS Image Editor
+# Vips FFI Image Editor Plugin
 
 High performance WordPress image processing with [VIPS](https://libvips.github.io/libvips/).
 
