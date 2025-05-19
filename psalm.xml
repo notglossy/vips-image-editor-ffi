@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<psalm
+    errorLevel="4"
+    resolveFromConfigFile="true"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    findUnusedBaselineEntry="true"
+    findUnusedCode="false"
+>
+    <projectFiles>
+        <file name="vips-image-editor-ffi.php" />
+        <directory name="classes" />
+        <ignoreFiles>
+            <directory name="vendor" />
+        </ignoreFiles>
+    </projectFiles>
+
+    <!-- WordPress specific settings -->
+    <stubs>
+        <file name="vendor/php-stubs/wordpress-stubs/wordpress-stubs.php" />
+    </stubs>
+
+    <globals>
+        <var name="wpdb" type="wpdb" />
+        <var name="wp_query" type="WP_Query" />
+        <var name="wp" type="WP" />
+    </globals>
+
+    <issueHandlers>
+        <!-- Common WordPress patterns that trigger Psalm warnings -->
+        <UndefinedConstant errorLevel="suppress" />
+        <UndefinedFunction errorLevel="suppress" />
+        <UndefinedClass>
+            <errorLevel type="suppress">
+                <referencedClass name="WP_*" />
+            </errorLevel>
+        </UndefinedClass>
+        <MixedMethodCall errorLevel="suppress" />
+        <MixedAssignment errorLevel="suppress" />
+        <InvalidGlobal errorLevel="suppress" />
+        <InvalidMethodCall errorLevel="suppress" />
+        <InvalidDocblock errorLevel="suppress" />
+    </issueHandlers>
+</psalm>
