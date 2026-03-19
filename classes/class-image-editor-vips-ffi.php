@@ -58,7 +58,18 @@ class Image_Editor_Vips_FFI extends \WP_Image_Editor {
 	 * @return bool
 	 */
 	public static function test( $args = array() ) {
-		return true;
+		if ( ! extension_loaded( 'ffi' ) ) {
+			return false;
+		}
+		if ( ! ini_get( 'ffi.enable' ) ) {
+			return false;
+		}
+		try {
+			Vips\FFI::version();
+		} catch ( \Exception $e ) {
+			return false;
+		}
+		return parent::test( $args );
 	}
 
 	/**
