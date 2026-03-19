@@ -69,7 +69,10 @@ class Image_Editor_Vips_FFI extends \WP_Image_Editor {
 		} catch ( \Exception $e ) {
 			return false;
 		}
-		return parent::test( $args );
+		if ( isset( $args['mime_type'] ) && ! static::supports_mime_type( $args['mime_type'] ) ) {
+			return false;
+		}
+		return true;
 	}
 
 	/**
