@@ -206,6 +206,57 @@ class Image_Editor_Vips_FFI extends \WP_Image_Editor {
 	}
 
 	/**
+	 * Create an image sub-size and return the image meta data value for it.
+	 *
+	 * @since 5.3.0
+	 *
+	 * @param array $size_data {
+	 *     Array of size data.
+	 *
+	 *     @type int        $width  The maximum width in pixels.
+	 *     @type int        $height The maximum height in pixels.
+	 *     @type bool|array $crop   Whether to crop the image to exact dimensions.
+	 * }
+	 * @return array|\WP_Error The image data array for inclusion in the `sizes` array in the image meta,
+	 *                         WP_Error object on error.
+	 */
+	public function make_subsize( $size_data ) {
+		if ( ! isset( $size_data['width'] ) && ! isset( $size_data['height'] ) ) {
+			return new \WP_Error( 'image_subsize_create_error', __( 'Cannot resize the image. Both width and height are not set.', 'vips-image-editor' ) );
+		}
+
+		$orig_size = $this->size;
+
+		if ( ! isset( $size_data['width'] ) ) {
+			$size_data['width'] = null;
+		}
+		if ( ! isset( $size_data['height'] ) ) {
+			$size_data['height'] = null;
+		}
+		if ( ! isset( $size_data['crop'] ) ) {
+			$size_data['crop'] = false;
+		}
+
+		$resized = $this->_resize( $size_data['width'], $size_data['height'], $size_data['crop'] );
+
+		if ( is_wp_error( $resized ) ) {
+			return $resized;
+		}
+
+		$saved = $this->_save( $resized );
+
+		$this->size = $orig_size;
+
+		if ( is_wp_error( $saved ) ) {
+			return $saved;
+		}
+
+		unset( $saved['path'] );
+
+		return $saved;
+	}
+
+	/**
 	 * Resize multiple images from a single source.
 	 *
 	 * @since 3.5.0
