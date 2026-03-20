@@ -169,7 +169,10 @@ class Image_Editor_Vips_FFI extends \WP_Image_Editor {
 			return true;
 		}
 		try {
-			$resized     = $this->_resize( $max_w, $max_h, $crop );
+			$resized = $this->_resize( $max_w, $max_h, $crop );
+			if ( is_wp_error( $resized ) ) {
+				return $resized;
+			}
 			$this->image = $resized;
 			return true;
 		} catch ( Exception $exception ) {
@@ -185,7 +188,7 @@ class Image_Editor_Vips_FFI extends \WP_Image_Editor {
 	 * @param bool|array $crop Optional. Whether to crop the image. Default false.
 	 * @return resource|\WP_Error
 	 */
-	protected function _resize( $max_w, $max_h, $crop = false ) {
+	protected function _resize( $max_w, $max_h, $crop = false ) { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore -- overrides WP_Image_Editor::_resize().
 		$dims = image_resize_dimensions( $this->size['width'], $this->size['height'], $max_w, $max_h, $crop );
 		if ( ! $dims ) {
 			return new \WP_Error( 'error_getting_dimensions', __( 'Could not calculate resized image dimensions', 'vips-image-editor' ), $this->file );
@@ -444,7 +447,16 @@ class Image_Editor_Vips_FFI extends \WP_Image_Editor {
 	 * }
 	 */
 	public function save( $destfilename = null, $mime_type = null ) {
-		$saved = $this->_save( $this->image, $destfilename, $mime_type );
+		try {
+			$saved = $this->_save( $this->image, $destfilename, $mime_type );
+		} catch ( \Throwable $e ) {
+			/*
+			* Return false instead of WP_Error to work around wp_save_image()
+			* not handling WP_Error from wp_save_image_file().
+			* See: https://core.trac.wordpress.org/ticket/64902#ticket
+			*/
+			return false;
+		}
 
 		if ( ! is_wp_error( $saved ) ) {
 			$this->file      = $saved['path'];
@@ -464,7 +476,7 @@ class Image_Editor_Vips_FFI extends \WP_Image_Editor {
 	 * @param string   $filename Optional. The destination filename. Default null.
 	 * @param string   $mime_type Optional. The mime type of the image. Default null.
 	 */
-	protected function _save( $image, $filename = null, $mime_type = null ) {
+	protected function _save( $image, $filename = null, $mime_type = null ) { // phpcs:ignore PSR2.Methods.MethodDeclaration.Underscore -- overrides WP_Image_Editor::_save().
 		list( $filename, $extension, $mime_type ) = $this->get_output_format( $filename, $mime_type );
 
 		if ( ! $filename ) {
@@ -502,7 +514,27 @@ class Image_Editor_Vips_FFI extends \WP_Image_Editor {
 			$wp_filesystem->mkdir( $directory );
 		}
 
-		$image->writeToFile( $filename, $parameters );
+		// Use explicit heifsave for AVIF/HEIC/HEIF to avoid suffix registration issues
+		// where some libvips builds don't register .avif for the file saver.
+		if ( 'image/avif' === $mime_type ) {
+			$image->heifsave(
+				$filename,
+				array(
+					'Q'           => $this->get_quality(),
+					'compression' => Vips\ForeignHeifCompression::AV1,
+				)
+			);
+		} elseif ( 'image/heic' === $mime_type || 'image/heif' === $mime_type ) {
+			$image->heifsave(
+				$filename,
+				array(
+					'Q'           => $this->get_quality(),
+					'compression' => Vips\ForeignHeifCompression::HEVC,
+				)
+			);
+		} else {
+			$image->writeToFile( $filename, $parameters );
+		}
 
 		// Set correct file permissions.
 		$stat  = stat( dirname( $filename ) );
@@ -547,78 +579,83 @@ class Image_Editor_Vips_FFI extends \WP_Image_Editor {
 			return false;
 		}
 
-		switch ( $mime_type ) {
-			case 'image/png':
-				header( 'Content-Type: image/png' );
-				echo $this->image->writeToBuffer( '.png' ); // phpcs:ignore
-				return true;
+		try {
+			switch ( $mime_type ) {
+				case 'image/png':
+					header( 'Content-Type: image/png' );
+					echo $this->image->writeToBuffer( '.png' ); // phpcs:ignore
+					return true;
 
-			case 'image/jpeg':
-				header( 'Content-Type: image/jpeg' );
-				echo $this->image->writeToBuffer( // phpcs:ignore
-					'.jpg',
-					array(
-						'Q' => $this->get_quality(), // phpcs:ignore
-					)
-				);
-				return true;
+				case 'image/jpeg':
+					header( 'Content-Type: image/jpeg' );
+					echo $this->image->writeToBuffer( // phpcs:ignore
+						'.jpg',
+						array(
+							'Q' => $this->get_quality(), // phpcs:ignore
+						)
+					);
+					return true;
 
-			case 'image/gif':
-				header( 'Content-Type: image/gif' );
-				echo $this->image->writeToBuffer( '.gif' ); // phpcs:ignore
-				return true;
+				case 'image/gif':
+					header( 'Content-Type: image/gif' );
+					echo $this->image->writeToBuffer( '.gif' ); // phpcs:ignore
+					return true;
 
-			case 'image/webp':
-				header( 'Content-Type: image/webp' );
-				echo $this->image->writeToBuffer( // phpcs:ignore
-					'.webp',
-					array(
-						'Q' => $this->get_quality(), // phpcs:ignore
-					)
-				);
-				return true;
+				case 'image/webp':
+					header( 'Content-Type: image/webp' );
+					echo $this->image->writeToBuffer( // phpcs:ignore
+						'.webp',
+						array(
+							'Q' => $this->get_quality(), // phpcs:ignore
+						)
+					);
+					return true;
 
-			case 'image/avif':
-				header( 'Content-Type: image/avif' );
-				echo $this->image->writeToBuffer( // phpcs:ignore
-					'.avif',
-					array(
-						'Q' => $this->get_quality(), // phpcs:ignore
-					)
-				);
-				return true;
-			case 'image/heic':
-				header( 'Content-Type: image/heic' );
-				echo $this->image->writeToBuffer( // phpcs:ignore
-					'.heic',
-					array(
-						'Q' => $this->get_quality(), // phpcs:ignore
-					)
-				);
-				return true;
+				case 'image/avif':
+					header( 'Content-Type: image/avif' );
+					echo $this->image->heifsave_buffer( // phpcs:ignore
+						array(
+							'Q'           => $this->get_quality(), // phpcs:ignore
+							'compression' => Vips\ForeignHeifCompression::AV1, // phpcs:ignore
+						)
+					);
+					return true;
+				case 'image/heic':
+					header( 'Content-Type: image/heic' );
+					echo $this->image->heifsave_buffer( // phpcs:ignore
+						array(
+							'Q'           => $this->get_quality(), // phpcs:ignore
+							'compression' => Vips\ForeignHeifCompression::HEVC, // phpcs:ignore
+						)
+					);
+					return true;
 
-			case 'image/heif':
-				header( 'Content-Type: image/heif' );
-				echo $this->image->writeToBuffer( // phpcs:ignore
-					'.heif',
-					array(
-						'Q' => $this->get_quality(), // phpcs:ignore
-					)
-				);
-				return true;
+				case 'image/heif':
+					header( 'Content-Type: image/heif' );
+					echo $this->image->heifsave_buffer( // phpcs:ignore
+						array(
+							'Q'           => $this->get_quality(), // phpcs:ignore
+							'compression' => Vips\ForeignHeifCompression::HEVC, // phpcs:ignore
+						)
+					);
+					return true;
 
-			case 'image/jxl':
-				header( 'Content-Type: image/jxl' );
-				echo $this->image->writeToBuffer( // phpcs:ignore
-					'.jxl',
-					array(
-						'Q' => $this->get_quality(), // phpcs:ignore
-					)
-				);
-				return true;
+				case 'image/jxl':
+					header( 'Content-Type: image/jxl' );
+					echo $this->image->writeToBuffer( // phpcs:ignore
+						'.jxl',
+						array(
+							'Q' => $this->get_quality(), // phpcs:ignore
+						)
+					);
+					return true;
 
+			}
+
+			return false;
+		} catch ( \Throwable $e ) {
+			return false;
 		}
-		return false;
 	}
 
 	/**
