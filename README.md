@@ -67,4 +67,4 @@ composer phpcs   # Run WordPress coding standards checks
 
 ## License
 
-GPLv3 or later - see [License](http://www.gnu.org/licenses/gpl-3.0.html)
+GPLv2 or later - see [License](http://www.gnu.org/licenses/gpl-2.0.html)
