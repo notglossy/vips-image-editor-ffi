@@ -76,3 +76,24 @@ add_action( 'plugins_loaded', __NAMESPACE__ . '\\init' );
 
 // Use WordPress add_filter function from global namespace.
 \add_filter( 'wp_image_editors', __NAMESPACE__ . '\\image_editors_add_vips_ffi' );
+
+/**
+ * Convert unsupported output formats to JPEG.
+ *
+ * When a format like AVIF cannot be encoded by any available image editor
+ * (e.g. libvips lacks AV1 support), this filter converts the output to JPEG
+ * so that image editing operations (scale, rotate, crop) still succeed.
+ *
+ * @param array  $output_format Map of input mime types to output mime types.
+ * @param string $filename     The original image filename.
+ * @param string $mime_type    The original image mime type.
+ * @return array Modified output format map.
+ */
+function maybe_convert_unsupported_formats( $output_format, $filename, $mime_type ) {
+	// Only convert formats that our editor can't save.
+	if ( class_exists( __NAMESPACE__ . '\\Format_Support' ) && ! Format_Support::is_format_supported( $mime_type ) ) {
+		$output_format[ $mime_type ] = 'image/jpeg';
+	}
+	return $output_format;
+}
+\add_filter( 'image_editor_output_format', __NAMESPACE__ . '\\maybe_convert_unsupported_formats', 10, 3 );
