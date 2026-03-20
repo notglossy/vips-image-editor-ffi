@@ -35,7 +35,7 @@
     <rule ref="WordPress-Docs"/>
 
     <!-- Check for PHP cross-version compatibility -->
-    <config name="testVersion" value="8.2-"/>
+    <config name="testVersion" value="8.1-"/>
     <rule ref="PHPCompatibilityWP"/>
 
     <!-- Rules customization -->
