@@ -445,6 +445,8 @@ class Image_Editor_Vips_FFI extends \WP_Image_Editor {
 	 *     @type string $mime-type The mime type of the image.
 	 *     @type int    $filesize  File size of the image.
 	 * }
+	 *
+	 * @psalm-return false|WP_Error|array{path: string, file: string, width: int, height: int, 'mime-type': string, filesize: int}
 	 */
 	public function save( $destfilename = null, $mime_type = null ) {
 		try {
