@@ -6,8 +6,8 @@
  * Version: 3.0.0
  * Author: Not Glossy
  * Author URI: https://github.com/notglossy/
- * License: GPLv3 or later
- * License URI: http://www.gnu.org/licenses/gpl-3.0.html
+ * License: GPLv2 or later
+ * License URI: http://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: vips-image-editor
  * Requires PHP: 8.2
  * Requires at least: 6.0
