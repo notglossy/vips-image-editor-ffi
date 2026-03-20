@@ -3,7 +3,7 @@
  * Plugin Name: Vips FFI Image Editor
  * Plugin URI: https://github.com/notglossy/vips-image-editor-ffi
  * Description: High performance WordPress image processing with Vips using PHP FFI.
- * Version: 3.0.0
+ * Version: 3.1.0
  * Author: Not Glossy
  * Author URI: https://github.com/notglossy/
  * License: GPLv2 or later

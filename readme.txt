@@ -4,7 +4,7 @@ Tags: vips, image, ffi, webp, heic, avif, jxl, raspberry pi, low memory, perform
 Requires at least: 6.0.0
 Tested up to: 6.8.1
 Requires PHP: 8.2.0
-Stable tag: 3.0.0
+Stable tag: 3.1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,15 @@ VIPS typically uses 5-10x less memory than ImageMagick and GD. For example, proc
 Absolutely. If you're on a VPS with limited CPU and memory, VIPS can dramatically improve your site's performance when processing images. This is especially noticeable when generating thumbnails for large images or when multiple image processing operations happen simultaneously.
 
 == Changelog ==
+
+= 3.1.0 =
+* Feature: Added `make_subsize` support for more efficient thumbnail generation
+* Feature: Improved HEIF/AVIF support and error handling
+* Feature: Added FFI availability checks in `test()` method
+* Feature: Limited `test()` to supported mime types only
+* Fix: Unsupported output formats (e.g. AVIF without AV1) now fall back to JPEG
+* Fix: Fixed Psalm annotation for `save()` return type
+* Change: Updated CI workflow with security audit, caching, and bumped GitHub Actions versions
 
 = 3.0.0 =
 * Feature: Added proper namespacing using `NotGlossy\VipsImageEditorFFI`
