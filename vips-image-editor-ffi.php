@@ -23,6 +23,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit();
 }
 
+// Load Composer autoloader immediately so classes are available when any hook fires,
+// regardless of which plugins_loaded callback runs first.
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	require __DIR__ . '/vendor/autoload.php';
+}
+
 add_action(
 	'admin_notices',
 	function () {
@@ -61,11 +67,6 @@ function image_editors_add_vips_ffi( $editors ) {
  * Initialize the plugin
  */
 function init() {
-
-	// Check if we are using local Composer.
-	if ( file_exists( __DIR__ . '/vendor' ) ) {
-		require __DIR__ . '/vendor/autoload.php';
-	}
 
 	// Include Format_Support helper class.
 	include_once __DIR__ . '/classes/class-format-support.php';
