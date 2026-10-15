@@ -23,6 +23,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit();
 }
 
+// Load Composer autoloader immediately so classes are available when any hook fires,
+// regardless of which plugins_loaded callback runs first.
+if ( file_exists( __DIR__ . '/vendor/autoload.php' ) ) {
+	require __DIR__ . '/vendor/autoload.php';
+}
+
+// Include Format_Support helper class immediately for the same reason: the editor's
+// test() and supports_mime_type() depend on it and may run from another plugin's plugins_loaded callback.
+require_once __DIR__ . '/classes/class-format-support.php';
+
 add_action(
 	'admin_notices',
 	function () {
@@ -56,23 +66,6 @@ function image_editors_add_vips_ffi( $editors ) {
 
 	return $editors;
 }
-
-/**
- * Initialize the plugin
- */
-function init() {
-
-	// Check if we are using local Composer.
-	if ( file_exists( __DIR__ . '/vendor' ) ) {
-		require __DIR__ . '/vendor/autoload.php';
-	}
-
-	// Include Format_Support helper class.
-	include_once __DIR__ . '/classes/class-format-support.php';
-}
-
-// Initialize the plugin.
-add_action( 'plugins_loaded', __NAMESPACE__ . '\\init' );
 
 // Use WordPress add_filter function from global namespace.
 \add_filter( 'wp_image_editors', __NAMESPACE__ . '\\image_editors_add_vips_ffi' );
