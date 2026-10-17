@@ -383,7 +383,7 @@ class Image_Editor_Vips_FFI extends \WP_Image_Editor {
 	public function rotate( $angle ) {
 		try {
 			// Angle is counter clockwise because WordPress was built with GD in mind.
-			$angle = -$angle;
+			$angle = - (int) $angle;
 			// Modulo magic.
 			$angle = ( 360 + ( $angle % 360 ) ) % 360;
 			if ( 90 === $angle ) {

@@ -1,6 +1,8 @@
 <?xml version="1.0"?>
 <psalm
     errorLevel="4"
+    phpVersion="8.2"
+    ensureOverrideAttribute="false"
     resolveFromConfigFile="true"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xmlns="https://getpsalm.org/schema/config"
@@ -31,11 +33,6 @@
         <!-- Common WordPress patterns that trigger Psalm warnings -->
         <UndefinedConstant errorLevel="suppress" />
         <UndefinedFunction errorLevel="suppress" />
-        <UndefinedClass>
-            <errorLevel type="suppress">
-                <referencedClass name="WP_*" />
-            </errorLevel>
-        </UndefinedClass>
         <MixedMethodCall errorLevel="suppress" />
         <MixedAssignment errorLevel="suppress" />
         <InvalidGlobal errorLevel="suppress" />
